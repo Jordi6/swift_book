@@ -681,14 +681,32 @@ struct Card {
 let threeOfSpades = Card(rank: .three, suit: .spades)
 let threeOfSpadesDescription = threeOfSpades.simpleDescription()
 print(threeOfSpadesDescription)
-
+print()
 
 // experiment: write a function that returns an array contaning a full deck of cards, with one card
 // of each combination of rank and suit.
 
-func cardDeck() -> [Card] {
+func cardDeck() -> [String] {
+    var deck: [String] = []
+    let suits: [Suit] = [.spades, .clubs, .hearts, .diamonds]
+	
+    for suit in suits {
+        for card in 1...13 {
+            if let convertedRank = Rank(rawValue: card) {
+				
+                let newCard = Card(rank: convertedRank, suit: suit)
+                // see how it's made.
+                // print(newCard.simpleDescription())
+                deck.append(newCard.simpleDescription())
+            }
+        }
+    }
 
+    return deck
 }
+// print(cardDeck())
+
+
 
 
 
