@@ -979,3 +979,41 @@ print()
 
 
 
+
+// Generics
+// write a name inside angle brackets to make a generic function or type.
+
+
+func makeArray<Item>(repeating item: Item, numberOfTimes: Int) -> [Item] {
+    var result: [Item] = []
+    for _ in 0..<numberOfTimes {
+        result.append(item)
+    }
+    return result
+}
+let r = makeArray(repeating: "knock", numberOfTimes: 4)
+let nt = makeArray(repeating: 0, numberOfTimes: 4)
+print(r)
+print(nt)
+
+
+
+
+// you can make generic forms of functions and methods, as well as classes, enumerations, and 
+// structures.
+// Reimplement the Swift standard library's optional type
+
+enum OptionalValue<Wrapped> {
+    case none
+    case some(Wrapped)
+}
+var possibleInteger: OptionalValue<Int> = .none
+possibleInteger = .some(100)
+
+
+
+
+
+
+
+
