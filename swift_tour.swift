@@ -711,6 +711,201 @@ func cardDeck() -> [String] {
 
 
 
+// Concurrency
+
+// async: marks the function as asynchronous.
+// await: used to call the asynchronous function, indicating that the execution will wait until
+// the async function completes.
+
+func fetchUserID(from server: String) async -> Int {
+    if server == "primary" {
+        return 97
+    }
+    return 501
+}
+
+func fetchUsername(from server: String) async -> String {
+    let userID = await fetchUserID(from: server)
+    if userID == 501 {
+        return "John Appleseed"
+    }
+    return "Guest"
+}
+        
+
+// async let: to call an asynchronous function, letting it run in parallel with other 
+// asynchronous code. When you use the value it returns, write await.
+
+func connectUser(to server: String) async {
+    async let userID = fetchUserID(from: server)
+    async let username = fetchUsername(from: server)
+
+    let greeting = await "Hello \(username), user ID \(userID)"
+    print(greeting)
+}
+
+
+// Task: used to call asynchronous functions from synchronous code, without waiting for them
+// to return.
+
+Task {
+    await connectUser(to: "primary")
+    print()
+}
+// Prints "Hello Guest, user ID 97"
+
+
+// use task groups to strucutre concurrent code. 
+// withTaskGroup is built-in function: https://developer.apple.com/documentation/swift/taskgroup
+
+let userIDs = await withTaskGroup(of: Int.self) { group in
+    for server in ["primary", "secondary", "development"] {
+        group.addTask {
+            return await fetchUserID(from: server)
+        }
+    }
+
+    var results: [Int] = []
+    for await result in group {
+        results.append(result)
+    }
+    return results
+}
+print(userIDs)
+print()
+
+
+// actors are similar to classes, excpet they ensure that different asynchronous functions can
+// safely interact with an instance of the same actor at the same time.
+
+
+actor ServerConnection {
+    var server: String = "primary"
+    private var activeUsers: [Int] = []
+
+    func connect() async -> Int {
+        let userID = await fetchUserID(from: server)
+        // ... communicate with server ...
+        activeUsers.append(userID)
+        return userID
+    }
+}
+
+
+// when you call a method on an actor or access one of its properties, you mark that code with:
+// await to indicate that it might wait for other code that's already running on the actor to finish
+
+let server = ServerConnection()
+let userID = await server.connect()
+print(userID) 
+
+
+
+
+// Protocols & Extensions
+
+
+// use "protocol" to declare a protocol.
+// protocol: Define requirements that conforming types must implement.
+// classes, enumerations, and structures can all adopt protocols.  
+
+
+protocol ExampleProtocol {
+    var simpleDescription: String { get }
+    var simpleNumber: Int { get }
+    mutating func adjust()
+}
+
+
+class SimpleClass: ExampleProtocol {
+    var simpleDescription: String = "A very simple class."
+    var simpleNumber: Int = 001
+    var anotherProperty: Int = 69105
+    
+    func adjust() {
+        simpleDescription += " Now 100% adjusted."
+    }
+}
+var a = SimpleClass()
+a.adjust()
+let aDescription = a.simpleDescription
+print(aDescription)
+
+struct SimpleStructure: ExampleProtocol {
+    var simpleDescription: String = "A simple structure"
+    var simpleNumber: Int = 002
+
+    mutating func adjust() {
+        simpleDescription += " (adjusted)"
+    }
+}
+var b = SimpleStructure()
+b.adjust()
+let bDescription = b.simpleDescription
+print(bDescription)
+
+
+
+
+
+// Extension: used to add functionality to an existing type, such as new methods and computed 
+// properties. You can use an extension to add protocol conformance to a type that's declared
+// elsewhere, or even to a type that you imported from a library or framework.
+
+
+extension Int: ExampleProtocol {
+    var simpleDescription: String {
+        return "The number \(self)"
+    }
+    var simpleNumber: Int {
+        return self
+    }
+
+    mutating func adjust() {
+        self += 42
+    }
+}
+print(7.simpleDescription)
+print(7.simpleNumber)
+// Prints "The number 7"
+
+
+
+// you can use a protocol name just like any other named type - for example, to create a collection
+// of objects that have different types but that all conform to a single protocol. When you work 
+// with values whose type is a boxed protocol type, methods outside the protocol definition aren't
+// available. 
+
+
+let protocolValue: any ExampleProtocol = a
+print(protocolValue.simpleDescription)
+// Prints "A very simple class. Now 100% adjusted."
+
+
+
+
+
+
+
+
+
+// Error Handling
+// you represent errors using any type that adpots the "Error" protocol.
+
+
+enum PrinterError: Error {
+    case outOfPaper
+    case noToner
+    case onFire
+}
+
+
+// use "throw" to throw an error and "throws" to mark a function that can throw an error.
+// If you throw an error in a function, the function returns immediately and the code that called
+// the function handels the error.
+
+
+
 
 
 
