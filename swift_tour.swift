@@ -1013,7 +1013,45 @@ possibleInteger = .some(100)
 
 
 
+// use "where" right before the body to specify a list of requirements - for example, to require
+// the type to implement a protocol, to require two types to be the same, or to require a class 
+// to have a particular superclass.
 
 
+func anyCommonElements<T: Sequence, U: Sequence>(_ lhs: T, _ rhs: U) -> Bool 
+where T.Element: Equatable, T.Element == U.Element {
+
+    for lhsItem in lhs {
+        for rhsItem in rhs {
+            if lhsItem == rhsItem {
+                return true
+            }
+        }
+    }
+    return false
+}
+print(anyCommonElements([1, 2, 3], [3]))
+print()
+
+
+// experiment: modify the anycommonElements(_:_:) function to make a function that returns an 
+// array of the elements that any two sequences have in common.
+
+
+func anyCommonElementsTwo<T: Sequence, U: Sequence>(_ lhs: T, _ rhs: U) -> [T.Element]
+where T.Element: Equatable, T.Element == U.Element {
+    
+    var commonElements: [T.Element] = []
+
+    for lhsItem in lhs {
+        for rhsItem in rhs {
+            if lhsItem == rhsItem {
+                commonElements.append(rhsItem) 
+            }
+        }
+    }
+    return commonElements 
+}
+print(anyCommonElementsTwo([1, 2, 3], [1, 2, 3, 4]))
 
 
